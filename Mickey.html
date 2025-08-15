@@ -165,6 +165,34 @@
 <body>
   <div class="hearts" id="hearts"></div>
   <div class="confetti" id="confetti"></div>
+
+  <!-- Password Modal -->
+  <div id="passwordModal" style="
+    position:fixed; inset:0; background:rgba(0,0,0,0.4);
+    display:flex; align-items:center; justify-content:center; z-index:999;
+    font-family:'Fredoka',sans-serif; backdrop-filter: blur(3px);
+  ">
+    <div style="
+      background:#fff; padding:24px 28px; border-radius:16px; 
+      max-width:300px; width:90%; text-align:center;
+      box-shadow:0 8px 28px rgba(0,0,0,.25);
+    ">
+      <h2 style="margin-top:0; color:#ff2f87;">🔒 ใส่รหัสเพื่อเปิด</h2>
+      <input type="password" id="passwordInput" placeholder="กรอกรหัสผ่าน"
+        style="padding:10px; width:100%; border:2px solid #ffd0e8; border-radius:8px; font-size:16px; text-align:center;">
+      <div style="margin-top:14px;">
+        <button id="passwordSubmit" style="
+          background:linear-gradient(135deg,#ff8bc4,#ff4fa3); 
+          color:#fff; border:none; padding:10px 16px; border-radius:999px;
+          font-weight:700; cursor:pointer;
+        ">ยืนยัน</button>
+      </div>
+      <p id="passwordError" style="color:red; font-size:14px; margin:10px 0 0; display:none;">
+        รหัสผ่านไม่ถูกต้อง
+      </p>
+    </div>
+  </div>
+
   <div class="container">
     <header>
       <h1>Happy Anniversary</h1>
@@ -202,11 +230,16 @@
   <script>
     const envelope = document.getElementById('envelope');
     const openBtn = document.getElementById('openBtn');
-    const replayBtn = document.getElementById('replayBtn');
     const letter = document.getElementById('letter');
     const confettiLayer = document.getElementById('confetti');
 
+    const passwordModal = document.getElementById('passwordModal');
+    const passwordInput = document.getElementById('passwordInput');
+    const passwordSubmit = document.getElementById('passwordSubmit');
+    const passwordError = document.getElementById('passwordError');
+
     let opened = false;
+    let passwordPassed = false;
 
     function launchConfetti(){
       confettiLayer.innerHTML = '';
@@ -236,18 +269,40 @@
       launchConfetti();
     }
 
-    function resetEnvelope(){
-      opened = false;
-      envelope.classList.remove('open');
-      letter.setAttribute('aria-hidden','true');
-      openBtn.setAttribute('aria-expanded','false');
+    function requestPassword(){
+      passwordModal.style.display = 'flex';
+      passwordInput.value = '';
+      passwordError.style.display = 'none';
+      passwordInput.focus();
     }
 
-    envelope.addEventListener('click', openEnvelope);
-    openBtn.addEventListener('click', openEnvelope);
-    replayBtn.addEventListener('click', ()=>{ resetEnvelope(); setTimeout(openEnvelope, 350); });
+    passwordSubmit.addEventListener('click', ()=>{
+      if(passwordInput.value === 'onlyfan'){
+        passwordPassed = true;
+        passwordModal.style.display = 'none';
+        openEnvelope();
+      } else {
+        passwordError.style.display = 'block';
+      }
+    });
 
-    // Floating hearts in background
+    passwordInput.addEventListener('keypress',(e)=>{
+      if(e.key === 'Enter'){
+        passwordSubmit.click();
+      }
+    });
+
+    envelope.addEventListener('click', ()=>{
+      if(!passwordPassed){ requestPassword(); }
+      else { openEnvelope(); }
+    });
+
+    openBtn.addEventListener('click', ()=>{
+      if(!passwordPassed){ requestPassword(); }
+      else { openEnvelope(); }
+    });
+
+    // Floating hearts
     const hearts = document.getElementById('hearts');
     const emojis = ['💖','💝','💘','💗','💞'];
     function spawnHearts(){
